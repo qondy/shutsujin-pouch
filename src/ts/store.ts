@@ -31,7 +31,7 @@ export function safeUrl(v: unknown): string {
   }
 }
 
-/** 「経費, 申請、総務」のような入力をタグ配列にする */
+/** 「交渉, 会議、思考法」のような入力をタグ配列にする */
 export function parseTags(v: string): string[] {
   const out: string[] = [];
   v.split(/[,、，\s]+/).forEach((t) => {

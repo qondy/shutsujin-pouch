@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#d35400">
   <title>出陣ポーチ</title>
-  <meta name="description" content="会社で働くための情報を、戦士の武器や防具のようにストックしておくアプリ。社内システム・ルール・連絡先・社内用語を4つの装備枠で整理し、ワンタップでコピー。出社前の点検や熟練度・さびの表示で、いつでも戦える装備を保てます。">
+  <meta name="description" content="仕事で戦うためのビジネススキル・ナレッジ・ビジネス書の学びを、戦士の武器や防具のようにストックしておくアプリ。スキル・心得・テンプレ・本の学びを4つの装備枠で整理し、ワンタップでコピー。仕事前の点検や熟練度・さびの表示で、身につけた知識をいつでも使える状態に保てます。">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <meta property="og:title" content="出陣ポーチ">
-  <meta property="og:description" content="会社の情報を、戦士の武器や防具のようにストック。出社前に装備を点検できるアプリ。">
+  <meta property="og:description" content="ビジネススキル・ナレッジ・ビジネス書の学びを、戦士の装備のようにストック。仕事前に点検できるアプリ。">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://shutsujin-pouch.vercel.app/ogp.png">
   <meta property="og:image:type" content="image/png">
@@ -29,7 +29,7 @@
     <div class="login-card">
       <span class="login-card__logo"><svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 22 V14 H40 V22"/><path d="M12 22 H52 V46 C52 51 48 55 43 55 H21 C16 55 12 51 12 46 Z"/><path d="M12 22 L32 36 L52 22"/><circle cx="32" cy="42" r="3"/></svg></span>
       <h1 class="login-card__title">出陣ポーチ</h1>
-      <p class="login-card__tagline">会社の情報を、戦士の装備のように。<br>武器・防具・道具・魔導書をポーチに入れて、<br>今日も出陣しよう。</p>
+      <p class="login-card__tagline">ビジネススキルを、戦士の装備のように。<br>スキル・心得・テンプレ・本の学びをポーチに入れて、<br>今日も出陣しよう。</p>
       <button id="btn-google-login" class="google-btn">
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -39,7 +39,7 @@
         </svg>
         Googleでログイン
       </button>
-      <p class="login-card__note">パスワードや社外秘の情報は保存しないでください。<br>会社の情報の扱いは、勤務先のルールに従ってください。</p>
+      <p class="login-card__note">パスワードなどの個人情報は保存しないでください。</p>
     </div>
   </div>
 
@@ -86,8 +86,7 @@
           </div>
         </div>
 
-        <p class="safety-note">パスワード・社外秘の情報は入れないでください。</p>
-
+        
         <div id="loading" class="empty-state">読み込み中…</div>
 
         <ul id="gear-list" class="gear-list"></ul>
@@ -95,7 +94,7 @@
         <div id="empty-first" class="empty-state empty-state--first card-surface hidden">
           <span class="empty-state__icon"><svg width="56" height="56" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 22 V14 H40 V22"/><path d="M12 22 H52 V46 C52 51 48 55 43 55 H21 C16 55 12 51 12 46 Z"/><path d="M12 22 L32 36 L52 22"/><circle cx="32" cy="42" r="3"/></svg></span>
           <p class="empty-state__title">ポーチはまだ空っぽです</p>
-          <p>よく聞かれる内線番号、毎月の申請手順、<br>覚えておきたい社内ルールから入れてみましょう。</p>
+          <p>最近読んだビジネス書の学び、よく使うフレームワーク、<br>メールの定型文などから入れてみましょう。</p>
           <div class="empty-state__actions">
             <button type="button" id="btn-empty-new" class="btn btn--primary">装備をポーチに入れる</button>
             <button type="button" id="btn-add-samples" class="btn btn--ghost">サンプルを4つ入れてみる</button>
@@ -121,14 +120,14 @@
             <span class="check__progress" id="check-progress"></span>
           </div>
           <div class="progress"><span class="progress__fill" id="check-bar-fill"></span></div>
-          <p class="check__lead">「装備中」にした情報を、出社前にざっと確認しましょう。点検の記録はこの端末に今日の分だけ残ります。</p>
+          <p class="check__lead">「装備中」にしたスキルや学びを、仕事の前にざっと確認しましょう。点検の記録はこの端末に今日の分だけ残ります。</p>
           <ul class="check-list" id="check-list"></ul>
           <div id="check-done" class="check__done hidden">
             <svg width="36" height="36" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M32 8 L52 15 V30 C52 43 44 51 32 56 C20 51 12 43 12 30 V15 Z"/><path d="M22 32 L29 39 L42 25"/></svg>
             <p>点検完了。準備は万全です。いざ、出陣！</p>
           </div>
           <div id="check-empty" class="empty-state hidden">
-            <p>まだ「装備中」の情報がありません。<br>ポーチで星マークを押すと、ここに並びます。</p>
+            <p>まだ「装備中」の装備がありません。<br>ポーチで星マークを押すと、ここに並びます。</p>
             <div class="empty-state__actions">
               <button type="button" id="btn-check-go" class="btn btn--ghost btn--sm">ポーチを見る</button>
             </div>
@@ -243,15 +242,15 @@
         <input type="text" id="input-title" maxlength="60" autocomplete="off" />
       </div>
       <div class="field">
-        <label class="field__label" for="input-copy">ワンタップでコピーする内容<span class="field__hint">内線番号・メールアドレス・定型文など</span></label>
+        <label class="field__label" for="input-copy">ワンタップでコピーする内容<span class="field__hint">メール文・定型フレーズ・テンプレなど</span></label>
         <input type="text" id="input-copy" maxlength="200" autocomplete="off" />
       </div>
       <div class="field">
-        <label class="field__label" for="input-url">URL<span class="field__hint">社内システムや資料の場所</span></label>
+        <label class="field__label" for="input-url">URL<span class="field__hint">参考にした本・記事・動画など</span></label>
         <input type="url" id="input-url" maxlength="500" placeholder="https://" autocomplete="off" inputmode="url" />
       </div>
       <div class="field">
-        <label class="field__label" for="input-body">内容・メモ<span class="field__hint">手順・ルール・気をつけることなど</span></label>
+        <label class="field__label" for="input-body">内容・メモ<span class="field__hint">要点・使い方・自分の気づきなど</span></label>
         <textarea id="input-body" rows="5" maxlength="3000"></textarea>
       </div>
       <div class="field">
@@ -263,8 +262,8 @@
         <span>装備中にする（出陣前点検に並びます）</span>
       </label>
 
-      <p class="secret-warning hidden" id="secret-warning">パスワードやトークンのような内容が含まれていませんか？ パスワードはこのアプリではなく、会社指定のパスワード管理ツールで管理してください。</p>
-      <p class="modal__note">パスワード・個人情報・社外秘の情報は入れないでください。</p>
+      <p class="secret-warning hidden" id="secret-warning">パスワードやトークンのような内容が含まれていませんか？ パスワードはこのアプリではなく、パスワード管理ツールで管理してください。</p>
+      <p class="modal__note">パスワードなどの個人情報は入れないでください。</p>
 
       <div class="modal__actions">
         <button type="button" id="btn-editor-cancel" class="btn btn--ghost">キャンセル</button>

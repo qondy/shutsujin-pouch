@@ -1,13 +1,13 @@
 /** 武器（攻め）/ 防具（守り）/ 道具（アイテム）/ 魔導書（知識） */
 export type Slot = 'weapon' | 'armor' | 'item' | 'tome';
 
-/** 装備（会社の情報1件）の入力内容 */
+/** 装備（ビジネススキル・ナレッジ1件）の入力内容 */
 export interface GearData {
   slot: Slot;
   title: string;
-  copyText: string; // ワンタップでコピーする内容（内線番号・メールアドレスなど）
-  url: string; // 社内システムや資料のURL（http/https のみ）
-  body: string; // 手順・ルール・説明など
+  copyText: string; // ワンタップでコピーする内容（定型文・フレーズなど）
+  url: string; // 参考にした本・記事などのURL（http/https のみ）
+  body: string; // 要点・使い方・気づきなど
   tags: string[];
   pinned: boolean; // 装備中（出陣前点検の対象）
 }

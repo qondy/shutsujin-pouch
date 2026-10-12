@@ -31,16 +31,16 @@ const ICON = {
 
 const SLOT_LABEL: Record<Slot, string> = { weapon: '武器', armor: '防具', item: '道具', tome: '魔導書' };
 const SLOT_DESC: Record<Slot, string> = {
-  weapon: '仕事を進める道具（社内システム・テンプレ・手順）',
-  armor: '身を守る知識（ルール・規定・NG事項）',
-  item: 'すぐ使うもの（連絡先・内線・場所）',
-  tome: '知っておくこと（社内用語・人物メモ）',
+  weapon: '攻めのスキル（フレームワーク・思考法・交渉術）',
+  armor: '守りの心得（仕事の原則・失敗の教訓・メンタル）',
+  item: 'すぐ使える道具（テンプレ・定型文・フレーズ）',
+  tome: '知識の源（ビジネス書・記事・セミナーの学び）',
 };
 const SLOT_EXAMPLE: Record<Slot, { title: string; copy: string; body: string }> = {
-  weapon: { title: '例：経費精算のやり方', copy: '例：申請フォームのURLや定型文', body: '例：1. 経費システムにログイン 2. 領収書を添付…' },
-  armor: { title: '例：情報持ち出しのルール', copy: '例：よく使う規定の番号', body: '例：USBメモリは使用禁止。社外送付は共有リンクで…' },
-  item: { title: '例：情報システム部（PCトラブル）', copy: '例：内線 1234', body: '例：平日9:00〜18:00。まずは電話で。' },
-  tome: { title: '例：「ヨミ」= 売上見込み', copy: '', body: '例：営業会議でよく出てくる言葉…' },
+  weapon: { title: '例：PREP法で話す', copy: '例：結論は〜です。理由は〜', body: '例：結論→理由→具体例→結論の順で話す。報告や会議の発言で使う…' },
+  armor: { title: '例：悪い報告ほど早く', copy: '', body: '例：トラブルは小さいうちに共有する。隠すほど傷が広がる…' },
+  item: { title: '例：日程調整メールの定型文', copy: '例：以下の日程でご都合はいかがでしょうか。', body: '例：候補は3つ以上出す。所要時間も書く…' },
+  tome: { title: '例：『イシューからはじめよ』の学び', copy: '', body: '例：解く前に、本当に解くべき問いかを見極める…' },
 };
 
 const slotIcon = (slot: Slot, size = 18): string => svg(SLOT_PATHS[slot], size);
@@ -545,15 +545,15 @@ function renderStatus(): void {
   // 手薄な枠のアドバイス
   let advice = '';
   if (gears.length === 0) {
-    advice = 'まずはポーチに装備を1つ入れてみましょう。よく聞かれる内線番号や、毎月の申請手順がおすすめです。';
+    advice = 'まずはポーチに装備を1つ入れてみましょう。最近読んだビジネス書の学びや、よく使うフレームワークがおすすめです。';
   } else {
     const minCount = Math.min(...counts.map((c) => c.length));
     const weak = SLOTS.filter((_, i) => counts[i].length === minCount);
     const tips: Record<Slot, string> = {
-      weapon: '毎月の申請・よく使う社内システム・資料テンプレなど、仕事を前に進める「武器」を足しましょう。',
-      armor: '就業規則・セキュリティのきまり・やってはいけないことなど、身を守る「防具」を足しましょう。',
-      item: '内線番号・担当者・会議室や備品の場所など、すぐ取り出せる「道具」を足しましょう。',
-      tome: '社内用語・略語や、誰に何を聞けばいいかの人物メモなど、「魔導書」を足しましょう。',
+      weapon: 'ロジカルシンキング・交渉術・プレゼンの型など、仕事を前に進める「武器」を足しましょう。',
+      armor: '仕事の原則・失敗から学んだ教訓・ストレスとの付き合い方など、自分を守る「防具」を足しましょう。',
+      item: 'メールの定型文・会議で使える質問・資料のテンプレなど、すぐ取り出せる「道具」を足しましょう。',
+      tome: 'ビジネス書・記事・セミナーで得た学びなど、知識の源になる「魔導書」を足しましょう。',
     };
     advice = minCount === maxCount ? '4つの枠がバランスよくそろっています。この調子で使い込んで熟練度を上げましょう。' : `手薄な枠：${weak.map((s) => SLOT_LABEL[s]).join('・')}。${tips[weak[0]]}`;
   }
@@ -599,7 +599,7 @@ function renderDetail(): void {
 
   const rust = rustOf(g);
   els.detailRust.classList.toggle('hidden', rust === 'none');
-  els.detailRust.textContent = rust === 'none' ? '' : `${RUST_LABEL[rust]}：${daysAgo(g.reviewedAt)}から見直していません。ルールや連絡先が変わっていないか確認し、「手入れした」を押しましょう。`;
+  els.detailRust.textContent = rust === 'none' ? '' : `${RUST_LABEL[rust]}：${daysAgo(g.reviewedAt)}から見直していません。内容を読み返して身についているか確かめ、「手入れした」を押しましょう。`;
 
   els.detailCopyRow.classList.toggle('hidden', !g.copyText);
   els.detailCopyText.textContent = g.copyText;
