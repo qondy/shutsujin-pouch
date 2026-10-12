@@ -1,0 +1,52 @@
+// Colors — パンプキン（OGPサムネイルと統一。革のポーチのイメージ）
+$color-bg: #fbf6f2;
+$color-surface: #ffffff;
+$color-surface-2: #f6ece4;
+$color-surface-3: #eedccd;
+$color-primary: #d35400;
+$color-primary-hover: #ba4a00;
+$color-primary-ink: #a84300; // 白地の上で文字として使う濃いオレンジ（コントラスト確保）
+$color-danger: #dc2626;
+$color-text: #26201c;
+$color-text-muted: #6b5f57;
+$color-border: #eadfd6;
+
+// 装備の種類ごとの色（primaryには追従させない）
+$color-weapon: #c0392b;
+$color-weapon-bg: #fbeae8;
+$color-armor: #2471a3;
+$color-armor-bg: #e6f0f8;
+$color-item: #1e8449;
+$color-item-bg: #e5f4eb;
+$color-tome: #7d3c98;
+$color-tome-bg: #f2e9f6;
+$color-rust: #a0522d;
+$color-rust-bg: #f7ebe1;
+$color-heavy-rust: #7b341e;
+$color-pin: #f39c12;
+
+// Typography
+$font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+$font-size-xs: 12px;
+$font-size-sm: 13px;
+$font-size-base: 15px;
+$font-size-lg: 18px;
+$font-size-xl: 22px;
+$font-size-2xl: 28px;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;
+
+// Border radius
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 16px;
+
+// Breakpoints
+$bp-mobile: 480px;
+$bp-tablet: 768px;
