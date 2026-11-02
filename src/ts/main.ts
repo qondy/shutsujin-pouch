@@ -8,6 +8,9 @@ import {
 } from './store';
 import { Gear, GearData, Slot } from './types';
 import { closeOverlay, iconEl, openOverlay, showToast, textEl } from './ui';
+import { initClickTracking } from './analytics';
+
+initClickTracking();
 
 // ============================================================
 // 固定アイコン（開発者定義のSVGのみ。ユーザー入力は含めない）
