@@ -70,6 +70,7 @@
       <div class="tabs" role="tablist" aria-label="画面の切り替え">
         <button type="button" class="tabs__btn is-active" data-view="pouch" role="tab" aria-selected="true">ポーチ</button>
         <button type="button" class="tabs__btn" data-view="check" role="tab" aria-selected="false">出陣前点検</button>
+        <button type="button" class="tabs__btn" data-view="build" role="tab" aria-selected="false">ビルド</button>
         <button type="button" class="tabs__btn" data-view="status" role="tab" aria-selected="false">ステータス</button>
       </div>
 
@@ -151,6 +152,22 @@
       </section>
 
       <!-- ステータス -->
+      <section class="view hidden" data-view="build">
+        <div class="build-head card-surface">
+          <h2 class="build-head__title">出陣ビルド</h2>
+          <p class="build-head__text">武器・防具・道具・魔導書を1つずつ選んで、その日の「出陣セット」を組みましょう。何通りでも保存できます。</p>
+          <div class="build-head__actions">
+            <button type="button" id="btn-build-new" class="btn btn--primary btn--sm" data-track="build_new">＋ ビルドを組む</button>
+            <button type="button" id="btn-build-random" class="btn btn--ghost btn--sm" data-track="build_random">おまかせで組む</button>
+          </div>
+          <p class="build-head__summary" id="build-summary"></p>
+        </div>
+        <ul class="build-list" id="build-list"></ul>
+        <div class="empty-state card-surface hidden" id="build-empty">
+          <p>まだビルドがありません。「ビルドを組む」から、最初の出陣セットを作ってみましょう。装備が1つ以上あれば組めます。</p>
+        </div>
+      </section>
+
       <section class="view hidden" data-view="status">
         <div class="card-surface status-hero">
           <p class="status-hero__label">いまの称号</p>
@@ -282,6 +299,41 @@
         <button type="submit" id="btn-editor-save" class="btn btn--primary">保存する</button>
       </div>
     </form>
+  </div>
+
+  <!-- ビルドの作成・編集 -->
+  <div id="build-overlay" class="dialog-overlay">
+    <form id="build-form" class="modal modal--wide" novalidate>
+      <div class="modal__head">
+        <div class="modal__title" id="build-editor-title">新しいビルドを組む</div>
+        <button type="button" id="btn-build-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <div class="field">
+        <label class="field__label" for="build-name">ビルドの名前<span class="field__req">必須</span></label>
+        <input type="text" id="build-name" maxlength="30" placeholder="例：会議で押し切る日" autocomplete="off" />
+      </div>
+      <div class="build-slots" id="build-slots"></div>
+      <div class="build-preview" id="build-preview" aria-live="polite"></div>
+      <p class="build-odds" id="build-odds"></p>
+      <div class="build-reroll">
+        <button type="button" id="btn-build-reroll" class="btn btn--ghost btn--sm" data-track="build_reroll">おまかせで引き直す</button>
+      </div>
+      <div class="modal__actions">
+        <button type="button" id="btn-build-cancel" class="btn btn--ghost">キャンセル</button>
+        <button type="submit" id="btn-build-save" class="btn btn--primary">保存する</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="build-confirm-overlay" class="dialog-overlay">
+    <div class="dialog" role="alertdialog" aria-modal="true">
+      <div class="dialog__title">ビルドを削除しますか？</div>
+      <div class="dialog__text" id="build-confirm-text"></div>
+      <div class="dialog__actions">
+        <button type="button" id="btn-build-confirm-cancel" class="btn btn--ghost">キャンセル</button>
+        <button type="button" id="btn-build-confirm-delete" class="btn btn--primary">削除する</button>
+      </div>
+    </div>
   </div>
 
   <!-- パスワードらしき内容の確認 -->

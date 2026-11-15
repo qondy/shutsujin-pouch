@@ -9,6 +9,7 @@ import {
 import { Gear, GearData, Slot } from './types';
 import { closeOverlay, iconEl, openOverlay, showToast, textEl } from './ui';
 import { initClickTracking } from './analytics';
+import { initBuilds } from './build-view';
 
 initClickTracking();
 
@@ -196,7 +197,7 @@ const els = {
 // ============================================================
 // 状態
 // ============================================================
-type View = 'pouch' | 'check' | 'status';
+type View = 'pouch' | 'check' | 'build' | 'status';
 type Filter = 'all' | 'pinned' | Slot;
 type SortKey = 'use' | 'recent' | 'new' | 'rust' | 'name';
 
@@ -620,6 +621,25 @@ function renderDetail(): void {
   els.btnDetailPin.classList.toggle('is-on', g.pinned);
 }
 
+// ビルド（装備を4枠に組んで保存）。render() から呼ばれるので、先に初期化しておく
+const builds = initBuilds({
+  getUid: () => state.uid,
+  getGears: () => state.gears,
+  slotLabel: SLOT_LABEL,
+  slotIcon,
+  levelOf,
+  isRusty: (g) => rustOf(g) !== 'none',
+  showToast,
+  openOverlay,
+  closeOverlay,
+  goCheck: () => {
+    state.view = 'check';
+    checkedMemory = loadChecked();
+    render();
+    window.scrollTo({ top: 0 });
+  },
+});
+
 function render(): void {
   els.tabs.forEach((t) => {
     const on = t.dataset.view === state.view;
@@ -629,6 +649,7 @@ function render(): void {
   els.views.forEach((v) => v.classList.toggle('hidden', v.dataset.view !== state.view));
   if (state.view === 'pouch') renderPouch();
   if (state.view === 'check') renderCheck();
+  if (state.view === 'build') builds.render();
   if (state.view === 'status') renderStatus();
   renderDetail();
 }
@@ -994,6 +1015,7 @@ onAuthChange((user: User | null) => {
     state.uid = '';
     state.gears = [];
     state.loaded = false;
+    builds.setUser(null);
     els.app.classList.add('hidden');
     els.login.classList.remove('hidden');
     els.userInfo.classList.add('hidden');
@@ -1003,6 +1025,7 @@ onAuthChange((user: User | null) => {
   state.uid = user.uid;
   state.loaded = false;
   checkedMemory = loadChecked();
+  builds.setUser(user.uid);
   els.login.classList.add('hidden');
   els.app.classList.remove('hidden');
   els.userInfo.classList.remove('hidden');

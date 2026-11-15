@@ -22,7 +22,7 @@ $slots: (
 // ===== Tabs =====
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: $spacing-xs;
   padding: $spacing-xs;
   margin-bottom: $spacing-md;
@@ -30,8 +30,10 @@ $slots: (
   border-radius: $radius-md;
 
   &__btn {
-    padding: 10px $spacing-xs;
+    min-width: 0;
+    padding: 10px 2px;
     border-radius: $radius-sm;
+    white-space: nowrap;
     font-size: $font-size-sm;
     font-weight: 700;
     color: $color-text-muted;

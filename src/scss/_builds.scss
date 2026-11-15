@@ -1,0 +1,259 @@
+// 出陣ビルド（build-view.ts とセット）
+.build-head {
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  &__title {
+    margin: 0 0 4px;
+    font-size: $font-size-lg;
+    font-weight: 800;
+  }
+
+  &__text {
+    margin: 0 0 $spacing-sm;
+    font-size: $font-size-sm;
+    line-height: 1.7;
+    color: $color-text-muted;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__summary {
+    margin: $spacing-sm 0 0;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+.build-list {
+  display: grid;
+  gap: $spacing-md;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.build-card {
+  padding: $spacing-md;
+  border: 1px solid $color-border;
+  border-radius: 16px;
+  background: $color-surface;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__name {
+    font-size: $font-size-lg;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+
+  &__count {
+    flex: none;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: $spacing-md;
+  }
+}
+
+.build-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: $font-size-sm;
+
+  &__icon {
+    display: inline-flex;
+    flex: none;
+  }
+
+  &__name {
+    min-width: 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+
+    &.is-empty {
+      font-weight: 400;
+      opacity: 0.55;
+    }
+  }
+
+  &--weapon {
+    background: $color-weapon-bg;
+    color: $color-weapon;
+  }
+
+  &--armor {
+    background: $color-armor-bg;
+    color: $color-armor;
+  }
+
+  &--item {
+    background: $color-item-bg;
+    color: $color-item;
+  }
+
+  &--tome {
+    background: $color-tome-bg;
+    color: $color-tome;
+  }
+}
+
+.build-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.build-pill {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: $color-surface-2;
+  font-size: $font-size-xs;
+  font-weight: 700;
+
+  &--high {
+    background: #fdecc8;
+    color: #8a5a00;
+  }
+
+  &--mid {
+    background: #e3eefb;
+    color: #1d5fa8;
+  }
+
+  &--full {
+    background: $color-primary;
+    color: #fff;
+  }
+
+  &--rust {
+    background: $color-rust-bg;
+    color: $color-rust;
+  }
+}
+
+.build-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+
+  &__label {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+.build-tag {
+  font-size: $font-size-xs;
+  color: $color-primary-ink;
+  font-weight: 700;
+}
+
+.build-hint {
+  width: 100%;
+  margin: 2px 0 0;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.build-slots {
+  display: grid;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.build-slot {
+  display: grid;
+  gap: 4px;
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: $font-size-sm;
+    font-weight: 700;
+  }
+
+  &__icon {
+    display: inline-flex;
+  }
+
+  &__select {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid $color-border;
+    border-radius: 10px;
+    background: $color-surface;
+    font: inherit;
+    color: inherit;
+  }
+
+  &--weapon .build-slot__label {
+    color: $color-weapon;
+  }
+
+  &--armor .build-slot__label {
+    color: $color-armor;
+  }
+
+  &--item .build-slot__label {
+    color: $color-item;
+  }
+
+  &--tome .build-slot__label {
+    color: $color-tome;
+  }
+}
+
+.build-preview {
+  margin-bottom: $spacing-sm;
+}
+
+.build-odds {
+  margin: 0 0 $spacing-sm;
+  font-size: $font-size-xs;
+  line-height: 1.7;
+  color: $color-text-muted;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.build-reroll {
+  margin-bottom: $spacing-md;
+}
