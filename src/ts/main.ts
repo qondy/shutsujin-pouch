@@ -4,11 +4,11 @@ import { submitFeedback } from './feedback';
 import { SAMPLE_GEARS } from './samples';
 import {
   createGear, createMany, deleteGear, markReviewed, markUsed, MAX_GEARS, parseTags,
-  safeUrl, setPinned, SLOTS, subscribeGears, updateGear,
+  safeUrl, setFavorite, setPinned, SLOTS, subscribeGears, updateGear,
 } from './store';
 import { Gear, GearData, Slot } from './types';
 import { closeOverlay, iconEl, openOverlay, showToast, textEl } from './ui';
-import { initClickTracking } from './analytics';
+import { initClickTracking, track } from './analytics';
 import { initBuilds } from './build-view';
 
 initClickTracking();
@@ -30,6 +30,7 @@ const ICON = {
   link: '<path d="M28 36 C31 40 37 40 40 37 L50 27 C53 24 53 18 50 15 C47 12 41 12 38 15 L34 19"/><path d="M36 28 C33 24 27 24 24 27 L14 37 C11 40 11 46 14 49 C17 52 23 52 26 49 L30 45"/>',
   star: '<path d="M32 8 L39.5 24 L57 26.2 L44.2 38.2 L47.6 55.5 L32 47 L16.4 55.5 L19.8 38.2 L7 26.2 L24.5 24 Z"/>',
   check: '<path d="M14 34 L26 46 L50 20"/>',
+  heart: '<path d="M32 52 C16 42 8 33 8 23 C8 15 14 10 21 10 C26 10 30 13 32 17 C34 13 38 10 43 10 C50 10 56 15 56 23 C56 33 48 42 32 52 Z"/>',
   rust: '<circle cx="32" cy="32" r="22"/><path d="M32 20 V34"/><circle cx="32" cy="43" r="1.5" fill="currentColor" stroke="none"/>',
 };
 
@@ -126,6 +127,10 @@ const els = {
   views: Array.from(document.querySelectorAll<HTMLElement>('.view')),
   // ポーチ
   search: $<HTMLInputElement>('input-search'),
+  focusPanel: $('focus-panel'),
+  focusList: $('focus-list'),
+  focusProgress: $('focus-progress'),
+  focusHint: $('focus-hint'),
   slotBar: $('slot-bar'),
   sort: $<HTMLSelectElement>('select-sort'),
   summary: $('summary'),
@@ -167,6 +172,7 @@ const els = {
   btnDetailUsed: $<HTMLButtonElement>('btn-detail-used'),
   btnDetailReview: $<HTMLButtonElement>('btn-detail-review'),
   btnDetailPin: $<HTMLButtonElement>('btn-detail-pin'),
+  btnDetailFav: $<HTMLButtonElement>('btn-detail-fav'),
   btnDetailEdit: $<HTMLButtonElement>('btn-detail-edit'),
   btnDetailDelete: $<HTMLButtonElement>('btn-detail-delete'),
   // 編集
@@ -181,6 +187,7 @@ const els = {
   inputBody: $<HTMLTextAreaElement>('input-body'),
   inputTags: $<HTMLInputElement>('input-tags'),
   inputPinned: $<HTMLInputElement>('input-pinned'),
+  inputFavorite: $<HTMLInputElement>('input-favorite'),
   secretWarning: $('secret-warning'),
   btnEditorSave: $<HTMLButtonElement>('btn-editor-save'),
   // ダイアログ
@@ -198,7 +205,8 @@ const els = {
 // 状態
 // ============================================================
 type View = 'pouch' | 'check' | 'build' | 'status';
-type Filter = 'all' | 'pinned' | Slot;
+type Filter = 'all' | 'favorite' | 'pinned' | Slot;
+const isSlotFilter = (f: Filter): f is Slot => f !== 'all' && f !== 'favorite' && f !== 'pinned';
 type SortKey = 'use' | 'recent' | 'new' | 'rust' | 'name';
 
 const state = {
@@ -244,6 +252,29 @@ function saveChecked(ids: string[]): void {
 }
 
 let checkedMemory: string[] = [];
+
+// 今日意識すること（お気に入り）の「意識した」チェック。出陣前点検とは別に、端末内に日付ごとに保存
+const focusKey = (): string => `shutsujin-focus:${state.uid}:${todayKey()}`;
+
+function loadFocused(): string[] {
+  try {
+    const raw = localStorage.getItem(focusKey());
+    const v: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveFocused(ids: string[]): void {
+  try {
+    localStorage.setItem(focusKey(), JSON.stringify(ids));
+  } catch {
+    // 保存できない環境では、この画面を開いている間だけ有効
+  }
+}
+
+let focusedMemory: string[] = [];
 
 // ============================================================
 // 操作
@@ -296,6 +327,16 @@ function openGearUrl(g: Gear): void {
   useGear(g);
 }
 
+async function toggleFavorite(g: Gear): Promise<void> {
+  try {
+    await setFavorite(state.uid, g.id, !g.favorite);
+    track('favorite_toggle', { on: g.favorite ? 0 : 1, slot: g.slot });
+    showToast(g.favorite ? 'お気に入りを外しました' : 'お気に入りに登録しました（今日意識することとして上に並びます）');
+  } catch {
+    showToast('保存できませんでした。通信状況を確認してください');
+  }
+}
+
 async function togglePin(g: Gear): Promise<void> {
   try {
     await setPinned(state.uid, g.id, !g.pinned);
@@ -340,10 +381,15 @@ function iconButton(icon: string, label: string, className: string, onClick: (e:
 // 描画：ポーチ（一覧）
 // ============================================================
 function renderSlotBar(): void {
-  const counts: Record<string, number> = { all: state.gears.length, pinned: state.gears.filter((g) => g.pinned).length };
+  const counts: Record<string, number> = {
+    all: state.gears.length,
+    favorite: state.gears.filter((g) => g.favorite).length,
+    pinned: state.gears.filter((g) => g.pinned).length,
+  };
   SLOTS.forEach((s) => (counts[s] = state.gears.filter((g) => g.slot === s).length));
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: 'すべて' },
+    { key: 'favorite', label: 'お気に入り' },
     ...SLOTS.map((s) => ({ key: s as Filter, label: SLOT_LABEL[s] })),
     { key: 'pinned', label: '装備中' },
   ];
@@ -353,7 +399,8 @@ function renderSlotBar(): void {
       b.type = 'button';
       b.className = `filter-chip${state.filter === key ? ' is-active' : ''}`;
       b.setAttribute('aria-pressed', String(state.filter === key));
-      if (key !== 'all' && key !== 'pinned') b.appendChild(iconEl(slotIcon(key, 14), 'filter-chip__icon'));
+      if (isSlotFilter(key)) b.appendChild(iconEl(slotIcon(key, 14), 'filter-chip__icon'));
+      if (key === 'favorite') b.appendChild(iconEl(svg(ICON.heart, 14), 'filter-chip__icon'));
       if (key === 'pinned') b.appendChild(iconEl(svg(ICON.star, 14), 'filter-chip__icon'));
       b.appendChild(document.createTextNode(label));
       b.appendChild(textEl('span', 'filter-chip__count', String(counts[key])));
@@ -369,8 +416,9 @@ function renderSlotBar(): void {
 function visibleGears(): Gear[] {
   const q = state.query.trim().toLowerCase();
   const list = state.gears.filter((g) => {
+    if (state.filter === 'favorite' && !g.favorite) return false;
     if (state.filter === 'pinned' && !g.pinned) return false;
-    if (state.filter !== 'all' && state.filter !== 'pinned' && g.slot !== state.filter) return false;
+    if (isSlotFilter(state.filter) && g.slot !== state.filter) return false;
     if (!q) return true;
     return [g.title, g.copyText, g.body, g.url, ...g.tags].some((t) => t.toLowerCase().includes(q));
   });
@@ -382,12 +430,13 @@ function visibleGears(): Gear[] {
     rust: (a, b) => a.reviewedAt - b.reviewedAt,
     name: byName,
   };
-  return list.sort(sorters[state.sort]);
+  // お気に入り（今日意識すること）は、どの並び順でも常に上に表示する
+  return list.sort((a, b) => Number(b.favorite) - Number(a.favorite) || sorters[state.sort](a, b));
 }
 
 function gearCard(g: Gear): HTMLElement {
   const li = document.createElement('li');
-  li.className = `gear-card gear-card--${g.slot}`;
+  li.className = `gear-card gear-card--${g.slot}${g.favorite ? ' is-favorite' : ''}`;
 
   const main = document.createElement('button');
   main.type = 'button';
@@ -403,6 +452,7 @@ function gearCard(g: Gear): HTMLElement {
   top.className = 'gear-card__top';
   top.appendChild(textEl('span', 'gear-card__slot', SLOT_LABEL[g.slot]));
   top.appendChild(levelBadge(g));
+  if (g.favorite) top.appendChild(textEl('span', 'fav-badge', 'お気に入り'));
   if (g.pinned) top.appendChild(textEl('span', 'pin-badge', '装備中'));
   const rust = rustOf(g);
   if (rust !== 'none') top.appendChild(textEl('span', `rust-badge rust-badge--${rust}`, RUST_LABEL[rust]));
@@ -435,6 +485,10 @@ function gearCard(g: Gear): HTMLElement {
     a.addEventListener('click', () => openGearUrl(g));
     actions.appendChild(a);
   }
+  const fav = iconButton(ICON.heart, 'お気に入り', `icon-btn icon-btn--fav${g.favorite ? ' is-on' : ''}`, () => void toggleFavorite(g));
+  fav.setAttribute('aria-pressed', String(g.favorite));
+  fav.setAttribute('aria-label', g.favorite ? 'お気に入りを外す' : 'お気に入りに登録');
+  actions.appendChild(fav);
   const pin = iconButton(ICON.star, g.pinned ? '外す' : '装備', `icon-btn icon-btn--pin${g.pinned ? ' is-on' : ''}`, () => void togglePin(g));
   pin.setAttribute('aria-pressed', String(g.pinned));
   actions.appendChild(pin);
@@ -442,8 +496,64 @@ function gearCard(g: Gear): HTMLElement {
   return li;
 }
 
+// 今日意識すること：お気に入りをポーチの一番上に並べ、今日意識できたらチェックする
+function renderFocus(): void {
+  const favs = state.gears
+    .filter((g) => g.favorite)
+    .sort((a, b) => SLOTS.indexOf(a.slot) - SLOTS.indexOf(b.slot) || b.useCount - a.useCount);
+  const hasGears = state.loaded && state.gears.length > 0;
+  els.focusPanel.classList.toggle('hidden', !hasGears || favs.length === 0);
+  els.focusHint.classList.toggle('hidden', !hasGears || favs.length > 0);
+  if (favs.length === 0) return;
+
+  const ids = new Set(favs.map((g) => g.id));
+  const done = focusedMemory.filter((id) => ids.has(id));
+  const allDone = done.length === favs.length;
+  els.focusProgress.textContent = allDone ? '今日はすべて意識できました' : `意識できた ${done.length} / ${favs.length}`;
+  els.focusProgress.classList.toggle('is-done', allDone);
+
+  els.focusList.replaceChildren(
+    ...favs.map((g) => {
+      const li = document.createElement('li');
+      const isDone = done.includes(g.id);
+      li.className = `focus-item focus-item--${g.slot}${isDone ? ' is-done' : ''}`;
+
+      const body = document.createElement('button');
+      body.type = 'button';
+      body.className = 'focus-item__body';
+      body.setAttribute('aria-label', `${g.title}の詳細を開く`);
+      body.addEventListener('click', () => openDetail(g.id));
+      body.appendChild(slotChip(g.slot));
+      body.appendChild(textEl('span', 'focus-item__title', g.title));
+      const sub = g.body || g.copyText;
+      if (sub) body.appendChild(textEl('span', 'focus-item__sub', sub.replace(/\s+/g, ' ')));
+      li.appendChild(body);
+
+      const mark = document.createElement('button');
+      mark.type = 'button';
+      mark.className = 'focus-item__mark';
+      mark.setAttribute('aria-pressed', String(isDone));
+      mark.setAttribute('aria-label', `${g.title}を${isDone ? '未チェックに戻す' : '今日意識できたことにする'}`);
+      mark.appendChild(iconEl(svg(ICON.check, 16), 'focus-item__mark-icon'));
+      mark.appendChild(textEl('span', '', isDone ? '意識できた' : '意識した'));
+      mark.addEventListener('click', () => {
+        focusedMemory = isDone ? focusedMemory.filter((id) => id !== g.id) : [...focusedMemory, g.id];
+        saveFocused(focusedMemory);
+        if (!isDone) {
+          track('focus_done', { slot: g.slot });
+          useGear(g);
+        }
+        renderFocus();
+      });
+      li.appendChild(mark);
+      return li;
+    }),
+  );
+}
+
 function renderPouch(): void {
   renderSlotBar();
+  renderFocus();
   els.loading.classList.toggle('hidden', state.loaded);
   if (!state.loaded) return;
 
@@ -454,10 +564,11 @@ function renderPouch(): void {
   els.emptyMatch.classList.toggle('hidden', none || list.length > 0);
 
   const pinned = state.gears.filter((g) => g.pinned).length;
+  const favs = state.gears.filter((g) => g.favorite).length;
   const rusty = state.gears.filter((g) => rustOf(g) !== 'none').length;
   els.summary.textContent = none
     ? ''
-    : `装備 ${state.gears.length}件（装備中 ${pinned}）${rusty ? `・手入れ待ち ${rusty}` : ''}`;
+    : `装備 ${state.gears.length}件（お気に入り ${favs}・装備中 ${pinned}）${rusty ? `・手入れ待ち ${rusty}` : ''}`;
 }
 
 // ============================================================
@@ -617,6 +728,9 @@ function renderDetail(): void {
   els.detailBody.textContent = g.body;
   els.detailTags.replaceChildren(...g.tags.map((t) => textEl('span', 'tag', `#${t}`)));
 
+  els.btnDetailFav.textContent = g.favorite ? 'お気に入りを外す' : 'お気に入りに登録';
+  els.btnDetailFav.classList.toggle('is-on', g.favorite);
+  els.btnDetailFav.setAttribute('aria-pressed', String(g.favorite));
   els.btnDetailPin.textContent = g.pinned ? '装備を外す' : '装備する';
   els.btnDetailPin.classList.toggle('is-on', g.pinned);
 }
@@ -680,6 +794,7 @@ function readEditor(): GearData {
     body: els.inputBody.value,
     tags: parseTags(els.inputTags.value),
     pinned: els.inputPinned.checked,
+    favorite: els.inputFavorite.checked,
   };
 }
 
@@ -704,13 +819,14 @@ function openEditor(id = ''): void {
   const g = id ? findGear(id) : undefined;
   state.editingId = g ? g.id : '';
   els.editorTitle.textContent = g ? '装備を編集' : '装備をポーチに入れる';
-  state.editorSlot = g ? g.slot : state.filter !== 'all' && state.filter !== 'pinned' ? state.filter : 'item';
+  state.editorSlot = g ? g.slot : isSlotFilter(state.filter) ? state.filter : 'item';
   els.inputTitle.value = g ? g.title : '';
   els.inputCopy.value = g ? g.copyText : '';
   els.inputUrl.value = g ? g.url : '';
   els.inputBody.value = g ? g.body : '';
   els.inputTags.value = g ? g.tags.join(', ') : '';
   els.inputPinned.checked = g ? g.pinned : false;
+  els.inputFavorite.checked = g ? g.favorite : state.filter === 'favorite';
   els.inputTitle.classList.remove('is-invalid');
   els.inputUrl.classList.remove('is-invalid');
   renderEditorSlot();
@@ -875,6 +991,10 @@ els.btnDetailReview.addEventListener('click', async () => {
     els.btnDetailReview.disabled = false;
   }
 });
+els.btnDetailFav.addEventListener('click', () => {
+  const g = findGear(state.detailId);
+  if (g) void toggleFavorite(g);
+});
 els.btnDetailPin.addEventListener('click', () => {
   const g = findGear(state.detailId);
   if (g) void togglePin(g);
@@ -1025,6 +1145,7 @@ onAuthChange((user: User | null) => {
   state.uid = user.uid;
   state.loaded = false;
   checkedMemory = loadChecked();
+  focusedMemory = loadFocused();
   builds.setUser(user.uid);
   els.login.classList.add('hidden');
   els.app.classList.remove('hidden');

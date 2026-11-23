@@ -9,7 +9,8 @@ export interface GearData {
   url: string; // 参考にした本・記事などのURL（http/https のみ）
   body: string; // 要点・使い方・気づきなど
   tags: string[];
-  pinned: boolean; // 装備中（出陣前点検の対象）
+  pinned: boolean; // 装備中（出陣前点検の対象。ビルドで出陣すると入れ替わる）
+  favorite: boolean; // お気に入り（今日意識すること。一覧の上に固定表示）
 }
 
 export interface Gear extends GearData {

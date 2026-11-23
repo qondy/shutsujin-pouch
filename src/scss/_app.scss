@@ -113,6 +113,7 @@ $slots: (
 
 .filter-chip {
   flex-shrink: 0;
+  min-height: 36px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -308,6 +309,181 @@ $slots: (
       fill: currentColor;
     }
   }
+
+  &--fav.is-on {
+    color: $color-fav;
+
+    svg path {
+      fill: currentColor;
+    }
+  }
+}
+
+.fav-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: $color-fav-bg;
+  color: $color-fav;
+}
+
+.gear-card.is-favorite {
+  box-shadow: 0 0 0 2px rgba($color-fav, 0.35), 0 2px 12px rgba($color-primary, 0.06);
+}
+
+// ===== 今日意識すること（お気に入り） =====
+.focus {
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border: 2px solid rgba($color-fav, 0.3);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px $spacing-sm;
+    margin-bottom: 12px;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: $font-size-lg;
+    font-weight: 800;
+  }
+
+  &__icon {
+    display: inline-flex;
+    color: $color-fav;
+
+    svg path {
+      fill: currentColor;
+    }
+  }
+
+  &__progress {
+    font-size: $font-size-xs;
+    font-weight: 700;
+    color: $color-text-muted;
+    background: $color-surface-2;
+    padding: 3px 10px;
+    border-radius: 999px;
+
+    &.is-done {
+      background: $color-fav;
+      color: #fff;
+    }
+  }
+
+  &__list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: $spacing-sm;
+  }
+
+  &__note {
+    margin-top: 10px;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    line-height: 1.6;
+  }
+}
+
+.focus-item {
+  display: flex;
+  align-items: stretch;
+  gap: $spacing-sm;
+  padding: 10px 12px;
+  border-radius: $radius-md;
+  background: $color-fav-bg;
+  transition: opacity 0.15s ease;
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    text-align: left;
+    color: inherit;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: 800;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  &__sub {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    line-height: 1.6;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+
+  &__mark {
+    flex-shrink: 0;
+    align-self: center;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 64px;
+    min-height: 44px;
+    padding: 6px 8px;
+    border-radius: $radius-md;
+    border: 1px solid rgba($color-fav, 0.4);
+    background: $color-surface;
+    color: $color-fav;
+    font-size: $font-size-xs;
+    font-weight: 700;
+  }
+
+  &__mark-icon {
+    display: inline-flex;
+  }
+
+  &.is-done {
+    .focus-item__mark {
+      background: $color-fav;
+      border-color: $color-fav;
+      color: #fff;
+    }
+
+    .focus-item__title {
+      color: $color-text-muted;
+    }
+  }
+}
+
+.focus-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 $spacing-xs $spacing-md;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  line-height: 1.6;
+
+  svg {
+    flex-shrink: 0;
+    color: $color-fav;
+  }
+}
+
+.btn--fav.is-on {
+  background: $color-fav-bg;
+  color: $color-fav;
 }
 
 .lv-badge {

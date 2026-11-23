@@ -55,6 +55,7 @@ function sanitize(data: GearData): GearData {
     body: data.body.slice(0, MAX_BODY),
     tags: normTags(data.tags),
     pinned: data.pinned === true,
+    favorite: data.favorite === true,
   };
 }
 
@@ -69,6 +70,7 @@ function fromDoc(id: string, d: Record<string, unknown>): Gear {
     body: str(d.body, MAX_BODY),
     tags: normTags(d.tags),
     pinned: d.pinned === true,
+    favorite: d.favorite === true,
     useCount: Math.floor(num(d.useCount)),
     lastUsedAt: num(d.lastUsedAt),
     reviewedAt: num(d.reviewedAt) || createdAt,
@@ -109,6 +111,10 @@ export async function createGear(uid: string, data: GearData): Promise<string> {
 export function updateGear(uid: string, id: string, data: GearData): Promise<void> {
   const now = Date.now();
   return updateDoc(gearDoc(uid, id), { ...sanitize(data), reviewedAt: now, updatedAt: now });
+}
+
+export function setFavorite(uid: string, id: string, favorite: boolean): Promise<void> {
+  return updateDoc(gearDoc(uid, id), { favorite, updatedAt: Date.now() });
 }
 
 export function setPinned(uid: string, id: string, pinned: boolean): Promise<void> {
