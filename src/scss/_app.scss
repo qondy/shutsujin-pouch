@@ -384,6 +384,17 @@ $slots: (
     gap: $spacing-sm;
   }
 
+  &__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    margin-top: 12px;
+
+    .btn {
+      min-height: 36px;
+    }
+  }
+
   &__note {
     margin-top: 10px;
     font-size: $font-size-xs;
@@ -394,6 +405,7 @@ $slots: (
 
 .focus-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: $spacing-sm;
   padding: 10px 12px;
@@ -451,6 +463,25 @@ $slots: (
 
   &__mark-icon {
     display: inline-flex;
+  }
+
+  &__pick {
+    flex-basis: 100%;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: $radius-md;
+    border: 1px dashed rgba($color-fav, 0.5);
+    background: $color-surface;
+    color: $color-fav;
+    font-size: $font-size-xs;
+    font-weight: 700;
+
+    &.is-on {
+      border-style: solid;
+      background: transparent;
+      color: $color-text-muted;
+      cursor: default;
+    }
   }
 
   &.is-done {

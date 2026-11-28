@@ -10,6 +10,7 @@ import { Gear, GearData, Slot } from './types';
 import { closeOverlay, iconEl, openOverlay, showToast, textEl } from './ui';
 import { initClickTracking, track } from './analytics';
 import { initBuilds } from './build-view';
+import { fillToday, loadToday, redrawToday, saveToday, TODAY_LIMIT } from './today-focus';
 
 initClickTracking();
 
@@ -131,6 +132,9 @@ const els = {
   focusList: $('focus-list'),
   focusProgress: $('focus-progress'),
   focusHint: $('focus-hint'),
+  focusTools: $('focus-tools'),
+  btnFocusRedraw: $<HTMLButtonElement>('btn-focus-redraw'),
+  btnFocusAll: $<HTMLButtonElement>('btn-focus-all'),
   slotBar: $('slot-bar'),
   sort: $<HTMLSelectElement>('select-sort'),
   summary: $('summary'),
@@ -275,6 +279,11 @@ function saveFocused(ids: string[]): void {
 }
 
 let focusedMemory: string[] = [];
+
+// 今日の分（お気に入りが4件以上のときに使う）
+const todayPickKey = (): string => `shutsujin-today:${state.uid}:${todayKey()}`;
+let todayMemory: string[] = [];
+let focusShowAll = false;
 
 // ============================================================
 // 操作
@@ -506,16 +515,34 @@ function renderFocus(): void {
   els.focusHint.classList.toggle('hidden', !hasGears || favs.length > 0);
   if (favs.length === 0) return;
 
-  const ids = new Set(favs.map((g) => g.id));
+  // お気に入りが多いときは、今日の分（3つ）に絞る
+  const narrowed = favs.length > TODAY_LIMIT;
+  if (narrowed) {
+    const next = fillToday(todayMemory, favs.map((g) => g.id));
+    if (next.join() !== todayMemory.join()) {
+      todayMemory = next;
+      saveToday(todayPickKey(), todayMemory);
+    }
+  }
+  const todays = narrowed ? favs.filter((g) => todayMemory.includes(g.id)) : favs;
+  const shown = narrowed && !focusShowAll ? todays : favs;
+
+  els.focusTools.classList.toggle('hidden', !narrowed);
+  els.btnFocusRedraw.classList.toggle('hidden', focusShowAll);
+  els.btnFocusAll.textContent = focusShowAll ? '今日の3つに戻す' : `お気に入りをすべて見る（${favs.length}件）`;
+  els.btnFocusAll.setAttribute('aria-expanded', String(focusShowAll));
+
+  const ids = new Set(todays.map((g) => g.id));
   const done = focusedMemory.filter((id) => ids.has(id));
-  const allDone = done.length === favs.length;
-  els.focusProgress.textContent = allDone ? '今日はすべて意識できました' : `意識できた ${done.length} / ${favs.length}`;
+  const allDone = done.length === todays.length;
+  els.btnFocusRedraw.disabled = allDone;
+  els.focusProgress.textContent = allDone ? '今日はすべて意識できました' : `意識できた ${done.length} / ${todays.length}`;
   els.focusProgress.classList.toggle('is-done', allDone);
 
   els.focusList.replaceChildren(
-    ...favs.map((g) => {
+    ...shown.map((g) => {
       const li = document.createElement('li');
-      const isDone = done.includes(g.id);
+      const isDone = focusedMemory.includes(g.id);
       li.className = `focus-item focus-item--${g.slot}${isDone ? ' is-done' : ''}`;
 
       const body = document.createElement('button');
@@ -546,9 +573,41 @@ function renderFocus(): void {
         renderFocus();
       });
       li.appendChild(mark);
+
+      // 「すべて見る」では、今日の3つを自分で選び直せる
+      if (narrowed && focusShowAll) {
+        const inToday = todayMemory.includes(g.id);
+        const pick = document.createElement('button');
+        pick.type = 'button';
+        pick.className = `focus-item__pick${inToday ? ' is-on' : ''}`;
+        pick.setAttribute('aria-pressed', String(inToday));
+        pick.textContent = inToday ? '今日の分に入っています' : '今日の分に入れる';
+        pick.disabled = inToday;
+        pick.addEventListener('click', () => chooseToday(g.id));
+        li.appendChild(pick);
+      }
       return li;
     }),
   );
+}
+
+function chooseToday(id: string): void {
+  if (todayMemory.includes(id)) return;
+  // まだ意識できていないものを1つ外して入れ替える
+  const out = [...todayMemory].reverse().find((x) => !focusedMemory.includes(x)) ?? todayMemory[todayMemory.length - 1];
+  todayMemory = [...todayMemory.filter((x) => x !== out), id];
+  saveToday(todayPickKey(), todayMemory);
+  track('focus_choose');
+  showToast('今日の分を入れ替えました');
+  renderFocus();
+}
+
+function redrawFocus(): void {
+  const favoriteIds = state.gears.filter((g) => g.favorite).map((g) => g.id);
+  todayMemory = redrawToday(todayMemory, favoriteIds, focusedMemory);
+  saveToday(todayPickKey(), todayMemory);
+  track('focus_redraw');
+  renderFocus();
 }
 
 function renderPouch(): void {
@@ -991,6 +1050,11 @@ els.btnDetailReview.addEventListener('click', async () => {
     els.btnDetailReview.disabled = false;
   }
 });
+els.btnFocusRedraw.addEventListener('click', redrawFocus);
+els.btnFocusAll.addEventListener('click', () => {
+  focusShowAll = !focusShowAll;
+  renderFocus();
+});
 els.btnDetailFav.addEventListener('click', () => {
   const g = findGear(state.detailId);
   if (g) void toggleFavorite(g);
@@ -1146,6 +1210,8 @@ onAuthChange((user: User | null) => {
   state.loaded = false;
   checkedMemory = loadChecked();
   focusedMemory = loadFocused();
+  todayMemory = loadToday(todayPickKey());
+  focusShowAll = false;
   builds.setUser(user.uid);
   els.login.classList.add('hidden');
   els.app.classList.remove('hidden');
